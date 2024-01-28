@@ -13,7 +13,6 @@ app.MapGet("/city", () => {
     //generate random number
     Random r = new Random();   
     int randomNumber = r.Next(0,10); 
-    Console.WriteLine(randomNumber);
 
     return cities[randomNumber];
 });
