@@ -1,4 +1,6 @@
-var app= WebApplication.CreateBuilder(args).Build();
+using Microsoft.AspNetCore.Mvc;
+
+var app = WebApplication.CreateBuilder(args).Build();
 
 app.MapGet("/post", () =>
 {
@@ -6,9 +8,28 @@ app.MapGet("/post", () =>
     JobsManager.Add(id);
     return id;
 });
-app.MapGet("/check/{id}", (string id) =>
+
+app.MapGet("/get/{id}", ([FromRoute] string id, CancellationToken cancellationToken) =>
 {
-    return JobsManager.Check(id);
+    try
+    {
+        var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        cts.CancelAfter(TimeSpan.FromSeconds(30));
+
+        var value = JobsManager.GetAsync(cancellationToken, id);
+
+        if (value != null)
+        {
+            return Results.Ok(value);
+        }
+
+        return Results.NoContent();
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex.ToString());
+        return Results.NoContent();
+    }
 });
 
 app.Run();
