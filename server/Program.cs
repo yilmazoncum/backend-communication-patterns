@@ -1,35 +1,18 @@
-using Microsoft.AspNetCore.Mvc;
-
 var app = WebApplication.CreateBuilder(args).Build();
 
-app.MapGet("/post", () =>
+app.MapGet("/get", async (CancellationToken cancellationToken, HttpContext ctx) =>
 {
-    string id = Guid.NewGuid().ToString();
-    JobsManager.Add(id);
-    return id;
-});
-
-app.MapGet("/get/{id}", ([FromRoute] string id, CancellationToken cancellationToken) =>
-{
-    try
-    {
-        var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        cts.CancelAfter(TimeSpan.FromSeconds(30));
-
-        var value = JobsManager.GetAsync(cancellationToken, id);
-
-        if (value != null)
+        ctx.Response.Headers.Add("Content-Type", "text/event-stream");
+        int i = 2; 
+        while (!cancellationToken.IsCancellationRequested)
         {
-            return Results.Ok(value);
-        }
+            await Task.Delay(2000);
+            var text = i + " seconds have passed";
+            i = i+2;
 
-        return Results.NoContent();
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine(ex.ToString());
-        return Results.NoContent();
-    }
+            await ctx.Response.WriteAsync($"event: " + text + "\n");
+
+        }   
 });
 
 app.Run();
