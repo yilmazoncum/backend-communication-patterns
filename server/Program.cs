@@ -11,8 +11,6 @@ app.MapGet("/post", () =>
 
 app.MapGet("/get/{id}", ([FromRoute] string id, CancellationToken cancellationToken) =>
 {
-    try
-    {
         var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         cts.CancelAfter(TimeSpan.FromSeconds(30));
 
@@ -24,12 +22,7 @@ app.MapGet("/get/{id}", ([FromRoute] string id, CancellationToken cancellationTo
         }
 
         return Results.NoContent();
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine(ex.ToString());
-        return Results.NoContent();
-    }
+ 
 });
 
 app.Run();
